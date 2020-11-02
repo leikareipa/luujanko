@@ -1,6 +1,6 @@
 // WHAT: Concatenated JavaScript source files
 // PROGRAM: Luujanko
-// VERSION: alpha live (01 November 2020 15:28:23 UTC)
+// VERSION: alpha live (02 November 2020 02:19:41 UTC)
 // AUTHOR: Tarpeeksi Hyvae Soft
 // LINK: https://www.github.com/leikareipa/luujanko/
 // FILES:
@@ -14,7 +14,7 @@
 //	./src/luujanko/vector3.js
 //	./src/luujanko/vertex.js
 //	./src/luujanko/mesh.js
-//	./src/luujanko/svg.js
+//	./src/luujanko/render.js
 /////////////////////////////////////////////////
 /*
 * 2020 Tarpeeksi Hyvae Soft
@@ -570,18 +570,26 @@ return Luu.matrix44.multiply(Luu.matrix44.multiply(translationMatrix, rotationMa
 *
 */
 "use strict";
-Luu.svg = function(meshes = [Luu.mesh()],
+Luu.render = function(meshes = [Luu.mesh()],
+targetSVGElement,
 options = Luu.svg.defaultOptions)
 {
 options = Object.freeze({
-...Luu.svg.defaultOptions,
+...Luu.render.defaultOptions,
 ...options
 });
-const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-svgElement.setAttribute("width", options.width);
-svgElement.setAttribute("height", options.height);
-draw(meshes, svgElement);
-return svgElement;
+const renderWidth = Number(targetSVGElement.getAttribute("width"));
+const renderHeight = Number(targetSVGElement.getAttribute("height"));
+wipe(targetSVGElement);
+draw(meshes, targetSVGElement);
+return;
+function wipe(svgElement)
+{
+while (svgElement.firstChild)
+{
+svgElement.removeChild(svgElement.firstChild);
+}
+}
 function draw(meshes, svgElement)
 {
 const cameraMatrix = Luu.matrix44.multiply(Luu.matrix44.rotation(options.viewDirection.x,
@@ -591,10 +599,10 @@ Luu.matrix44.translation(-options.viewPosition.x,
 -options.viewPosition.y,
 -options.viewPosition.z));
 const perspectiveMatrix = Luu.matrix44.perspective((options.fov * (Math.PI / 180)),
-(options.width / options.height),
+(renderWidth / renderHeight),
 options.nearPlane,
 options.farPlane);
-const screenSpaceMatrix = Luu.matrix44.ortho((options.width + 1), (options.height + 1));
+const screenSpaceMatrix = Luu.matrix44.ortho((renderWidth + 1), (renderHeight + 1));
 const clipSpaceMatrix = Luu.matrix44.multiply(perspectiveMatrix, cameraMatrix);
 for (const mesh of meshes)
 {
@@ -614,12 +622,10 @@ Luu.rasterize(transformedNgon, svgElement);
 return;
 }
 }
-Luu.svg.defaultOptions = {
+Luu.render.defaultOptions = {
 viewPosition: Luu.vector3(0, 0, 0),
 viewDirection: Luu.vector3(0, 0, 0),
 nearPlane: 1,
 farPlane: 1000,
 fov: 43,
-width: 640,
-height: 480,
 };

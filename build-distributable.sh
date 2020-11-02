@@ -3,7 +3,7 @@
 # Concatenates Luujanko's source files into a single distributable file.
 
 DIRECTORY="./distributable/"
-FILENAME="luujanko.cat.js"
+FILENAME="luujanko.js"
 VERSION="alpha live"
 
 SOURCE_FILES=("./src/luujanko/luujanko.js"
@@ -16,7 +16,7 @@ SOURCE_FILES=("./src/luujanko/luujanko.js"
               "./src/luujanko/vector3.js"
               "./src/luujanko/vertex.js"
               "./src/luujanko/mesh.js"
-              "./src/luujanko/svg.js")
+              "./src/luujanko/render.js")
 
 echo "// WHAT: Concatenated JavaScript source files" > "$DIRECTORY/$FILENAME"
 echo "// PROGRAM: Luujanko" >> "$DIRECTORY/$FILENAME"
