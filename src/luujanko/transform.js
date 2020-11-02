@@ -55,7 +55,9 @@ Luu.transform_and_clip = function(ngon,
         {
             Luu.ngon.transform(transformedNgon, clipSpaceMatrix);
 
-            if (!Luu.ngon.is_inside_viewport(transformedNgon))
+            Luu.ngon.clip_to_viewport(transformedNgon)
+
+            if (!transformedNgon.vertices.length)
             {
                 return null;
             }

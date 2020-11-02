@@ -48,25 +48,64 @@ Luu.ngon.transform = function(ngon, matrix44)
     }
 },
 
-// Returns true if at least one of the given n-gon's vertices is inside the viewport;
-// false otherwose.
-Luu.ngon.is_inside_viewport = function(ngon)
+// Clips all vertices against the sides of the viewport. Adapted from Benny
+// Bobaganoosh's 3d software renderer, the source for which is available at
+// https://github.com/BennyQBD/3DSoftwareRenderer.
+Luu.ngon.clip_to_viewport = function(ngon)
 {
-    for (const vertex of ngon.vertices)
-    {
-        // If this vertex is inside the viewport. In that case, at least one of the
-        // n-gon's vertices is inside the viewport, and so the n-gon doesn't need to
-        // be clipped.
-        if (( vertex.x <= vertex.w) &&
-            (-vertex.x <= vertex.w) &&
-            ( vertex.y <= vertex.w) &&
-            (-vertex.y <= vertex.w) &&
-            ( vertex.z <= vertex.w) &&
-            (-vertex.z <= vertex.w))
-        {
-            return true;
-        }
-    }
+    clip_on_axis("z", 1);
+    clip_on_axis("z", -1);
 
-    return false;
+    return;
+
+    function clip_on_axis(axis, factor)
+    {
+        if (ngon.vertices.length < 2)
+        {
+            return;
+        }
+
+        let prevVertex = ngon.vertices[ngon.vertices.length - ((ngon.vertices.length == 2)? 2 : 1)];
+        let prevComponent = (prevVertex[axis] * factor);
+        let isPrevVertexInside = (prevComponent <= prevVertex.w);
+        
+        // The vertices array will be modified in-place by appending the clipped vertices
+        // onto the end of the array, then removing the previous ones.
+        let k = 0;
+        let numOriginalVertices = ngon.vertices.length;
+        for (let i = 0; i < numOriginalVertices; i++)
+        {
+            const curComponent = (ngon.vertices[i][axis] * factor);
+            const thisVertexIsInside = (curComponent <= ngon.vertices[i].w);
+
+            // If either the current vertex or the previous vertex is inside but the other isn't,
+            // and they aren't both inside, interpolate a new vertex between them that lies on
+            // the clipping plane.
+            if (thisVertexIsInside ^ isPrevVertexInside)
+            {
+                const vertIdx = (numOriginalVertices + k++);
+                const lerpStep = (prevVertex.w - prevComponent) /
+                                  ((prevVertex.w - prevComponent) - (ngon.vertices[i].w - curComponent));
+
+                ngon.vertices[vertIdx] = Luu.vertex(Luu.lerp(prevVertex.x, ngon.vertices[i].x, lerpStep),
+                                                    Luu.lerp(prevVertex.y, ngon.vertices[i].y, lerpStep),
+                                                    Luu.lerp(prevVertex.z, ngon.vertices[i].z, lerpStep));
+
+                ngon.vertices[vertIdx].w = Luu.lerp(prevVertex.w, ngon.vertices[i].w, lerpStep);
+            }
+            
+            if (thisVertexIsInside)
+            {
+                ngon.vertices[numOriginalVertices + k++] = ngon.vertices[i];
+            }
+
+            prevVertex = ngon.vertices[i];
+            prevComponent = curComponent;
+            isPrevVertexInside = thisVertexIsInside;
+        }
+
+        ngon.vertices.splice(0, numOriginalVertices);
+
+        return;
+    }
 }
