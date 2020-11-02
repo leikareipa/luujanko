@@ -51,16 +51,12 @@ Luu.transform_and_clip = function(ngon,
             /// TODO: Apply a vertex shader here.
         }
 
-        // Clip space. Vertices that fall outside of the view frustum will be removed.
+        // Clip space. If none of the n-gon's vertices are inside the viewport, the n-gon
+        // will be culled.
         {
             Luu.ngon.transform(transformedNgon, clipSpaceMatrix);
 
-            Luu.ngon.clip_to_viewport(transformedNgon);
-
-            // If there are no vertices left after clipping, it means this n-gon is
-            // not visible on the screen at all, and so we don't need to consider it
-            // for rendering.
-            if (!transformedNgon.vertices.length)
+            if (!Luu.ngon.is_inside_viewport(transformedNgon))
             {
                 return null;
             }
