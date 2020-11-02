@@ -7,18 +7,15 @@
 
 "use strict";
 
-Luu.rasterize = function(ngon, svgElement)
+Luu.rasterize = function(ngon, svgPolygonElement)
 {
-    const polyElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    const material = ngon.material;
+    Luu.assert && (ngon &&
+                   (ngon.material) &&
+                   (ngon.vertices) &&
+                   (ngon.vertices.length >= 2))
+               || Luu.throw("Invalid n-gon for rasterization.");
 
-    polyElement.setAttribute("stroke", material.color.string());
-    polyElement.setAttribute("fill", "transparent");
-    polyElement.setAttribute("stroke-width", "1");
-    polyElement.setAttribute("shape-rendering", material.crispEdges? "crispEdges" : "geometricPrecision");
-    polyElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
-
-    svgElement.appendChild(polyElement);
+    svgPolygonElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
 
     return;
 }

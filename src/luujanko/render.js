@@ -11,6 +11,11 @@ Luu.render = function(meshes = [Luu.mesh()],
                       targetSVGElement,
                       options = Luu.svg.defaultOptions)
 {
+    const renderCallInfo = {
+        numNgonsRendered: 0,
+        totalRenderTimeMs: performance.now(),
+    };
+
     options = Object.freeze({
         ...Luu.render.defaultOptions,
         ...options
@@ -19,16 +24,19 @@ Luu.render = function(meshes = [Luu.mesh()],
     const renderWidth = Number(targetSVGElement.getAttribute("width"));
     const renderHeight = Number(targetSVGElement.getAttribute("height"));
 
+    prepare(targetSVGElement, meshes);
     wipe(targetSVGElement);
     draw(meshes, targetSVGElement);
 
-    return;
+    renderCallInfo.totalRenderTimeMs = (performance.now() - renderCallInfo.totalRenderTimeMs);
+
+    return renderCallInfo;
 
     function wipe(svgElement)
     {
-        while (svgElement.firstChild)
+        for (const child of svgElement.children)
         {
-            svgElement.removeChild(svgElement.firstChild);
+            child.setAttribute("points", "");
         }
     }
 
@@ -50,6 +58,8 @@ Luu.render = function(meshes = [Luu.mesh()],
 
         const clipSpaceMatrix = Luu.matrix44.multiply(perspectiveMatrix, cameraMatrix);
 
+        let numNgonsRendered = 0;
+
         for (const mesh of meshes)
         {
             const objectSpaceMatrix = Luu.mesh.object_space_matrix(mesh);
@@ -63,8 +73,40 @@ Luu.render = function(meshes = [Luu.mesh()],
 
                 if (transformedNgon)
                 {
-                    Luu.rasterize(transformedNgon, svgElement);
+                    const dstPolyElement = svgElement.children[numNgonsRendered++];
+
+                    Luu.rasterize(transformedNgon, dstPolyElement);
                 }
+            }
+        }
+
+        renderCallInfo.numNgonsRendered = numNgonsRendered;
+
+        return;
+    }
+
+    function prepare(svgElement, meshesToBeRendered)
+    {
+        const numNgonsInMeshes = meshesToBeRendered.reduce((ngonCount, mesh)=>(ngonCount += mesh.ngons.length), 0);  
+        
+        if (svgElement.children.length < numNgonsInMeshes)
+        {
+            const deltaNgons = (numNgonsInMeshes - svgElement.children.length);
+
+            Luu.log(`Resizing the polygon cache's capacity from ${svgElement.children.length} to ${numNgonsInMeshes}`);
+            
+            for (let i = 0; i < deltaNgons; i++)
+            {
+                const polyElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                
+                polyElement.setAttribute("stroke", "gray");
+                polyElement.setAttribute("fill", "transparent");
+                polyElement.setAttribute("stroke-width", "1");
+                polyElement.setAttribute("shape-rendering", "crispEdges");
+                polyElement.setAttribute("pointer-events", "none");
+                polyElement.setAttribute("points", "");
+
+                svgElement.appendChild(polyElement);
             }
         }
 
