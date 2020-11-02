@@ -7,21 +7,30 @@
 
 "use strict";
 
-Luu.svg = function(meshes = [Luu.mesh()],
-                   options = Luu.svg.defaultOptions)
+Luu.render = function(targetSVGElement,
+                      meshes = [Luu.mesh()],
+                      options = Luu.svg.defaultOptions)
 {
     options = Object.freeze({
-        ...Luu.svg.defaultOptions,
+        ...Luu.render.defaultOptions,
         ...options
     });
 
-    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgElement.setAttribute("width", options.width);
-    svgElement.setAttribute("height", options.height);
+    const renderWidth = Number(targetSVGElement.getAttribute("width"));
+    const renderHeight = Number(targetSVGElement.getAttribute("height"));
 
-    draw(meshes, svgElement);
+    wipe(targetSVGElement);
+    draw(meshes, targetSVGElement);
 
-    return svgElement;
+    return;
+
+    function wipe(svgElement)
+    {
+        while (svgElement.firstChild)
+        {
+            svgElement.removeChild(svgElement.firstChild);
+        }
+    }
 
     function draw(meshes, svgElement)
     {
@@ -33,11 +42,11 @@ Luu.svg = function(meshes = [Luu.mesh()],
                                                                             -options.viewPosition.z));
 
         const perspectiveMatrix = Luu.matrix44.perspective((options.fov * (Math.PI / 180)),
-                                                           (options.width / options.height),
+                                                           (renderWidth / renderHeight),
                                                            options.nearPlane,
                                                            options.farPlane);
 
-        const screenSpaceMatrix = Luu.matrix44.ortho((options.width + 1), (options.height + 1));
+        const screenSpaceMatrix = Luu.matrix44.ortho((renderWidth + 1), (renderHeight + 1));
 
         const clipSpaceMatrix = Luu.matrix44.multiply(perspectiveMatrix, cameraMatrix);
 
@@ -63,12 +72,10 @@ Luu.svg = function(meshes = [Luu.mesh()],
     }
 }
 
-Luu.svg.defaultOptions = {
+Luu.render.defaultOptions = {
     viewPosition: Luu.vector3(0, 0, 0),
     viewDirection: Luu.vector3(0, 0, 0),
     nearPlane: 1,
     farPlane: 1000,
     fov: 43,
-    width: 640,
-    height: 480,
 };
