@@ -7,8 +7,8 @@
 
 "use strict";
 
-Luu.render = function(targetSVGElement,
-                      meshes = [Luu.mesh()],
+Luu.render = function(meshes = [Luu.mesh()],
+                      targetSVGElement,
                       options = Luu.svg.defaultOptions)
 {
     options = Object.freeze({
