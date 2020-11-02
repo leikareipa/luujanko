@@ -31,8 +31,7 @@ Luu.transform_and_clip = function(ngon,
         {
             transformedNgon.vertices[v] = Luu.vertex(ngon.vertices[v].x,
                                                      ngon.vertices[v].y,
-                                                     ngon.vertices[v].z,
-                                                     ngon.vertices[v].w);
+                                                     ngon.vertices[v].z);
         }
 
         transformedNgon.material = ngon.material;

@@ -1,6 +1,6 @@
 // WHAT: Concatenated JavaScript source files
 // PROGRAM: Luujanko
-// VERSION: alpha live (02 November 2020 02:39:14 UTC)
+// VERSION: alpha live (02 November 2020 16:04:27 UTC)
 // AUTHOR: Tarpeeksi Hyvae Soft
 // LINK: https://www.github.com/leikareipa/luujanko/
 // FILES:
@@ -317,8 +317,7 @@ for (let v = 0; v < ngon.vertices.length; v++)
 {
 transformedNgon.vertices[v] = Luu.vertex(ngon.vertices[v].x,
 ngon.vertices[v].y,
-ngon.vertices[v].z,
-ngon.vertices[v].w);
+ngon.vertices[v].z);
 }
 transformedNgon.material = ngon.material;
 transformedNgon.isActive = true;
@@ -425,19 +424,18 @@ v.z *= -1;
 *
 */
 "use strict";
-Luu.vertex = function(x = 0, y = 0, z = 0, w = 1)
+Luu.vertex = function(x = 0, y = 0, z = 0)
 {
 Luu.assert && ((typeof x === "number") &&
 (typeof y === "number") &&
-(typeof z === "number") &&
-(typeof w === "number"))
+(typeof z === "number"))
 || Luu.throw("Expected numbers as parameters to the vertex factory.");
 const publicInterface =
 {
 x,
 y,
 z,
-w,
+w: 1,
 };
 return publicInterface;
 }

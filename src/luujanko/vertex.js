@@ -7,12 +7,11 @@
 
 "use strict";
 
-Luu.vertex = function(x = 0, y = 0, z = 0, w = 1)
+Luu.vertex = function(x = 0, y = 0, z = 0)
 {
     Luu.assert && ((typeof x === "number") &&
                    (typeof y === "number") &&
-                   (typeof z === "number") &&
-                   (typeof w === "number"))
+                   (typeof z === "number"))
                || Luu.throw("Expected numbers as parameters to the vertex factory.");
 
     const publicInterface =
@@ -20,7 +19,7 @@ Luu.vertex = function(x = 0, y = 0, z = 0, w = 1)
         x,
         y,
         z,
-        w,
+        w: 1,
     };
 
     return publicInterface;
