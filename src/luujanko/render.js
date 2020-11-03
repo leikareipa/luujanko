@@ -9,7 +9,7 @@
 
 Luu.render = function(meshes = [Luu.mesh()],
                       targetSVGElement,
-                      options = Luu.svg.defaultOptions)
+                      options = Luu.render.defaultOptions)
 {
     const renderCallInfo = {
         numNgonsRendered: 0,
