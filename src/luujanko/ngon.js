@@ -53,7 +53,11 @@ Luu.ngon.transform = function(ngon, matrix44)
 // https://github.com/BennyQBD/3DSoftwareRenderer.
 Luu.ngon.clip_to_viewport = function(ngon)
 {
-    clip_on_axis("z", 1);
+    clip_on_axis("x",  1);
+    clip_on_axis("x", -1);
+    clip_on_axis("y",  1);
+    clip_on_axis("y", -1);
+    clip_on_axis("z",  1);
     clip_on_axis("z", -1);
 
     return;
