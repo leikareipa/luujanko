@@ -89,6 +89,7 @@
                         onchange="set_sample(event.target.value);">
                     <optgroup label="Simple"></optgroup>
                     <option value="rotating-triangle">Rotating triangle</option>
+                    <option value="rotating-cube-model">Rotating cube model</option>
                 </select>
             </div>
         </div>
