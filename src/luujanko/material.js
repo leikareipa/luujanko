@@ -26,5 +26,4 @@ Luu.material = function(options = Luu.material.default)
 Luu.material.default = {
     color: Luu.color(0.5, 0.5, 0.5, 1),
     allowTransform: true,
-    crispEdges: false,
 };

@@ -21,7 +21,7 @@ Luu.color = function(red = 0.5, green = 0.5, blue = 0.5, alpha = 1)
         {
             /// TODO.
 
-            return "lightgray";
+            return "gray";
         }
     };
     

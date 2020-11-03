@@ -1,6 +1,6 @@
 // WHAT: Concatenated JavaScript source files
 // PROGRAM: Luujanko
-// VERSION: alpha live (02 November 2020 16:04:27 UTC)
+// VERSION: alpha live (03 November 2020 15:27:07 UTC)
 // AUTHOR: Tarpeeksi Hyvae Soft
 // LINK: https://www.github.com/leikareipa/luujanko/
 // FILES:
@@ -66,7 +66,7 @@ alpha,
 string: function()
 {
 /// TODO.
-return "lightgray";
+return "gray";
 }
 };
 return publicInterface;
@@ -94,7 +94,6 @@ return publicInterface;
 Luu.material.default = {
 color: Luu.color(0.5, 0.5, 0.5, 1),
 allowTransform: true,
-crispEdges: false,
 };
 /*
 * 2019 Tarpeeksi Hyvae Soft
@@ -249,26 +248,59 @@ for (const vert of ngon.vertices)
 Luu.vertex.transform(vert, matrix44);
 }
 },
-// Returns true if at least one of the given n-gon's vertices is inside the viewport;
-// false otherwose.
-Luu.ngon.is_inside_viewport = function(ngon)
+// Clips all vertices against the sides of the viewport. Adapted from Benny
+// Bobaganoosh's 3d software renderer, the source for which is available at
+// https://github.com/BennyQBD/3DSoftwareRenderer.
+Luu.ngon.clip_to_viewport = function(ngon)
 {
-for (const vertex of ngon.vertices)
+clip_on_axis("x",  1);
+clip_on_axis("x", -1);
+clip_on_axis("y",  1);
+clip_on_axis("y", -1);
+clip_on_axis("z",  1);
+clip_on_axis("z", -1);
+return;
+function clip_on_axis(axis, factor)
 {
-// If this vertex is inside the viewport. In that case, at least one of the
-// n-gon's vertices is inside the viewport, and so the n-gon doesn't need to
-// be clipped.
-if (( vertex.x <= vertex.w) &&
-(-vertex.x <= vertex.w) &&
-( vertex.y <= vertex.w) &&
-(-vertex.y <= vertex.w) &&
-( vertex.z <= vertex.w) &&
-(-vertex.z <= vertex.w))
+if (ngon.vertices.length < 2)
 {
-return true;
+return;
 }
+let prevVertex = ngon.vertices[ngon.vertices.length - ((ngon.vertices.length == 2)? 2 : 1)];
+let prevComponent = (prevVertex[axis] * factor);
+let isPrevVertexInside = (prevComponent <= prevVertex.w);
+// The vertices array will be modified in-place by appending the clipped vertices
+// onto the end of the array, then removing the previous ones.
+let k = 0;
+let numOriginalVertices = ngon.vertices.length;
+for (let i = 0; i < numOriginalVertices; i++)
+{
+const curComponent = (ngon.vertices[i][axis] * factor);
+const thisVertexIsInside = (curComponent <= ngon.vertices[i].w);
+// If either the current vertex or the previous vertex is inside but the other isn't,
+// and they aren't both inside, interpolate a new vertex between them that lies on
+// the clipping plane.
+if (thisVertexIsInside ^ isPrevVertexInside)
+{
+const vertIdx = (numOriginalVertices + k++);
+const lerpStep = (prevVertex.w - prevComponent) /
+((prevVertex.w - prevComponent) - (ngon.vertices[i].w - curComponent));
+ngon.vertices[vertIdx] = Luu.vertex(Luu.lerp(prevVertex.x, ngon.vertices[i].x, lerpStep),
+Luu.lerp(prevVertex.y, ngon.vertices[i].y, lerpStep),
+Luu.lerp(prevVertex.z, ngon.vertices[i].z, lerpStep));
+ngon.vertices[vertIdx].w = Luu.lerp(prevVertex.w, ngon.vertices[i].w, lerpStep);
 }
-return false;
+if (thisVertexIsInside)
+{
+ngon.vertices[numOriginalVertices + k++] = ngon.vertices[i];
+}
+prevVertex = ngon.vertices[i];
+prevComponent = curComponent;
+isPrevVertexInside = thisVertexIsInside;
+}
+ngon.vertices.splice(0, numOriginalVertices);
+return;
+}
 }
 /*
 * 2020 Tarpeeksi Hyvae Soft
@@ -277,16 +309,15 @@ return false;
 *
 */
 "use strict";
-Luu.rasterize = function(ngon, svgElement)
+Luu.rasterize = function(ngon, svgPolygonElement)
 {
-const polyElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-const material = ngon.material;
-polyElement.setAttribute("stroke", material.color.string());
-polyElement.setAttribute("fill", "transparent");
-polyElement.setAttribute("stroke-width", "1");
-polyElement.setAttribute("shape-rendering", material.crispEdges? "crispEdges" : "geometricPrecision");
-polyElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
-svgElement.appendChild(polyElement);
+Luu.assert && (ngon &&
+(ngon.material) &&
+(ngon.vertices) &&
+(ngon.vertices.length >= 2))
+|| Luu.throw("Invalid n-gon for rasterization.");
+svgPolygonElement.setAttribute("stroke", ngon.material.color.string());
+svgPolygonElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
 return;
 }
 /*
@@ -336,7 +367,8 @@ Luu.ngon.transform(transformedNgon, objectMatrix);
 // will be culled.
 {
 Luu.ngon.transform(transformedNgon, clipSpaceMatrix);
-if (!Luu.ngon.is_inside_viewport(transformedNgon))
+Luu.ngon.clip_to_viewport(transformedNgon)
+if (!transformedNgon.vertices.length)
 {
 return null;
 }
@@ -520,22 +552,28 @@ return Luu.matrix44.multiply(Luu.matrix44.multiply(translationMatrix, rotationMa
 "use strict";
 Luu.render = function(meshes = [Luu.mesh()],
 targetSVGElement,
-options = Luu.svg.defaultOptions)
+options = Luu.render.defaultOptions)
 {
+const renderCallInfo = {
+numNgonsRendered: 0,
+totalRenderTimeMs: performance.now(),
+};
 options = Object.freeze({
 ...Luu.render.defaultOptions,
 ...options
 });
 const renderWidth = Number(targetSVGElement.getAttribute("width"));
 const renderHeight = Number(targetSVGElement.getAttribute("height"));
+prepare(targetSVGElement, meshes);
 wipe(targetSVGElement);
 draw(meshes, targetSVGElement);
-return;
+renderCallInfo.totalRenderTimeMs = (performance.now() - renderCallInfo.totalRenderTimeMs);
+return renderCallInfo;
 function wipe(svgElement)
 {
-while (svgElement.firstChild)
+for (const child of svgElement.children)
 {
-svgElement.removeChild(svgElement.firstChild);
+child.setAttribute("points", "");
 }
 }
 function draw(meshes, svgElement)
@@ -552,6 +590,7 @@ options.nearPlane,
 options.farPlane);
 const screenSpaceMatrix = Luu.matrix44.ortho((renderWidth + 1), (renderHeight + 1));
 const clipSpaceMatrix = Luu.matrix44.multiply(perspectiveMatrix, cameraMatrix);
+let numNgonsRendered = 0;
 for (const mesh of meshes)
 {
 const objectSpaceMatrix = Luu.mesh.object_space_matrix(mesh);
@@ -563,8 +602,27 @@ clipSpaceMatrix,
 screenSpaceMatrix);
 if (transformedNgon)
 {
-Luu.rasterize(transformedNgon, svgElement);
+const dstPolyElement = svgElement.children[numNgonsRendered++];
+Luu.rasterize(transformedNgon, dstPolyElement);
 }
+}
+}
+renderCallInfo.numNgonsRendered = numNgonsRendered;
+return;
+}
+function prepare(svgElement, meshesToBeRendered)
+{
+const numNgonsInMeshes = meshesToBeRendered.reduce((ngonCount, mesh)=>(ngonCount += mesh.ngons.length), 0);
+if (svgElement.children.length < numNgonsInMeshes)
+{
+const deltaNgons = (numNgonsInMeshes - svgElement.children.length);
+Luu.log(`Resizing the polygon cache's capacity from ${svgElement.children.length} to ${numNgonsInMeshes}`);
+for (let i = 0; i < deltaNgons; i++)
+{
+const polyElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+polyElement.setAttribute("fill", "transparent");
+polyElement.setAttribute("pointer-events", "none");
+svgElement.appendChild(polyElement);
 }
 }
 return;

@@ -15,6 +15,7 @@ Luu.rasterize = function(ngon, svgPolygonElement)
                    (ngon.vertices.length >= 2))
                || Luu.throw("Invalid n-gon for rasterization.");
 
+    svgPolygonElement.setAttribute("stroke", ngon.material.color.string());
     svgPolygonElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
 
     return;

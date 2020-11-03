@@ -40,10 +40,11 @@ body
     font-family: sans-serif;
 }
 
-.luujanko-rendering-container
+#luujanko-rendering
 {
-    width: auto;
-    height: auto;
+    stroke: gray;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
 }
 
 .infoboxes-container

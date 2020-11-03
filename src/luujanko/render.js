@@ -99,12 +99,8 @@ Luu.render = function(meshes = [Luu.mesh()],
             {
                 const polyElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                 
-                polyElement.setAttribute("stroke", "gray");
                 polyElement.setAttribute("fill", "transparent");
-                polyElement.setAttribute("stroke-width", "1");
-                polyElement.setAttribute("shape-rendering", "crispEdges");
                 polyElement.setAttribute("pointer-events", "none");
-                polyElement.setAttribute("points", "");
 
                 svgElement.appendChild(polyElement);
             }
