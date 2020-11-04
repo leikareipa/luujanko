@@ -15,7 +15,7 @@ scene.initialize();
 
 const camera = first_person_camera("luujanko-rendering-container",
 {
-    position: {x:-70, y:33, z:-7},
+    position: {x:-60, y:28, z:-7},
     direction: {x:0, y:(Math.PI / 2), z:0},
     movementSpeed: 0.05,
 });
