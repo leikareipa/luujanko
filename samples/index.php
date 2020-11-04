@@ -92,6 +92,7 @@
                     <option value="rotating-cube-model">Rotating cube model</option>
                     <optgroup label="Ideas"></optgroup>
                     <option value="first-person-camera">First-person camera</option>
+                    <?php if (is_file("./extra-samples.php")) include("./extra-samples.php");?>
                 </select>
             </div>
         </div>
@@ -99,7 +100,7 @@
     </body>
 
     <script>
-        const defaultSample = "rotating-triangle";
+        const defaultSample = "rotating-cube-model";
 
         const urlParams = new URLSearchParams(window.location.search);
         const sample = (urlParams.get("sample") || defaultSample);
