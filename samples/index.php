@@ -100,7 +100,7 @@
     </body>
 
     <script>
-        const defaultSample = "rotating-cube-model";
+        const defaultSample = "<?php echo (is_file("./extra-samples.php")? "quake-e1m1" : "rotating-cube-model");?>";
 
         const urlParams = new URLSearchParams(window.location.search);
         const sample = (urlParams.get("sample") || defaultSample);
