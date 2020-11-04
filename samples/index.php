@@ -90,6 +90,8 @@
                     <optgroup label="Simple"></optgroup>
                     <option value="rotating-triangle">Rotating triangle</option>
                     <option value="rotating-cube-model">Rotating cube model</option>
+                    <optgroup label="Ideas"></optgroup>
+                    <option value="first-person-camera">First-person camera</option>
                 </select>
             </div>
         </div>

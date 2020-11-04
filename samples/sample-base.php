@@ -49,11 +49,6 @@
         <script type="module">
             import {Luu} from "../distributable/luujanko.js";
 
-            var renderSettings = {
-                viewDirection: Luu.rotation(0, 0, 0),
-                viewPosition: Luu.translation(0, 0, -170),
-            };
-
             (async()=>
             {
                 const sampleId = (new URLSearchParams(window.location.search).get("sample") || "textured-cube-model");
@@ -65,6 +60,9 @@
                 document.querySelector(".infoboxes-container").style.visibility = "visible";
 
                 const svgImage = document.getElementById("luujanko-rendering");
+
+                const defaultViewDirection = Luu.rotation(0, 0, 0);
+                const defaultViewPosition = Luu.translation(0, 0, -170);
 
                 // Used to keep track of when to update the UI's FPS and polycount displays
                 // (and whatever other real-time-updated info the UI might be showing).
@@ -81,8 +79,8 @@
 
                     const options = {
                         fov: 70,
-                        viewDirection: renderSettings.viewDirection,
-                        viewPosition: renderSettings.viewPosition,
+                        viewDirection: defaultViewDirection,
+                        viewPosition: defaultViewPosition,
                         ...sampleModule.sampleRenderOptions,
                     };
 

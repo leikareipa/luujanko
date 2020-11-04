@@ -112,7 +112,7 @@ Luu.render = function(meshes = [Luu.mesh()],
 
 Luu.render.defaultOptions = {
     viewPosition: Luu.vector3(0, 0, 0),
-    viewDirection: Luu.vector3(0, 0, 0),
+    viewDirection: Luu.vector3(0, 1, 0),
     nearPlane: 1,
     farPlane: 1000,
     fov: 43,
