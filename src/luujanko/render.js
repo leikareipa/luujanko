@@ -42,9 +42,9 @@ Luu.render = function(meshes = [Luu.mesh()],
 
     function draw(meshes, svgElement)
     {
-        const cameraMatrix = Luu.matrix44.multiply(Luu.matrix44.rotation(options.viewDirection.x,
-                                                                         options.viewDirection.y,
-                                                                         options.viewDirection.z),
+        const cameraMatrix = Luu.matrix44.multiply(Luu.matrix44.rotation(options.viewRotation.x,
+                                                                         options.viewRotation.y,
+                                                                         options.viewRotation.z),
                                                    Luu.matrix44.translation(-options.viewPosition.x,
                                                                             -options.viewPosition.y,
                                                                             -options.viewPosition.z));
@@ -112,7 +112,7 @@ Luu.render = function(meshes = [Luu.mesh()],
 
 Luu.render.defaultOptions = {
     viewPosition: Luu.vector3(0, 0, 0),
-    viewDirection: Luu.vector3(0, 1, 0),
+    viewRotation: Luu.vector3(0, 1, 0),
     nearPlane: 1,
     farPlane: 1000,
     fov: 43,

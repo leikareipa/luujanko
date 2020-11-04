@@ -1,6 +1,6 @@
 // WHAT: Concatenated JavaScript source files
 // PROGRAM: Luujanko
-// VERSION: alpha live (03 November 2020 15:27:07 UTC)
+// VERSION: alpha live (04 November 2020 14:22:53 UTC)
 // AUTHOR: Tarpeeksi Hyvae Soft
 // LINK: https://www.github.com/leikareipa/luujanko/
 // FILES:
@@ -578,9 +578,9 @@ child.setAttribute("points", "");
 }
 function draw(meshes, svgElement)
 {
-const cameraMatrix = Luu.matrix44.multiply(Luu.matrix44.rotation(options.viewDirection.x,
-options.viewDirection.y,
-options.viewDirection.z),
+const cameraMatrix = Luu.matrix44.multiply(Luu.matrix44.rotation(options.viewRotation.x,
+options.viewRotation.y,
+options.viewRotation.z),
 Luu.matrix44.translation(-options.viewPosition.x,
 -options.viewPosition.y,
 -options.viewPosition.z));
@@ -630,7 +630,7 @@ return;
 }
 Luu.render.defaultOptions = {
 viewPosition: Luu.vector3(0, 0, 0),
-viewDirection: Luu.vector3(0, 0, 0),
+viewRotation: Luu.vector3(0, 1, 0),
 nearPlane: 1,
 farPlane: 1000,
 fov: 43,

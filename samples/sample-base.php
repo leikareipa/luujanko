@@ -61,7 +61,7 @@
 
                 const svgImage = document.getElementById("luujanko-rendering");
 
-                const defaultViewDirection = Luu.rotation(0, 0, 0);
+                const defaultViewRotation = Luu.rotation(0, 0, 0);
                 const defaultViewPosition = Luu.translation(0, 0, -170);
 
                 // Used to keep track of when to update the UI's FPS and polycount displays
@@ -79,7 +79,7 @@
 
                     const options = {
                         fov: 70,
-                        viewDirection: defaultViewDirection,
+                        viewRotation: defaultViewRotation,
                         viewPosition: defaultViewPosition,
                         ...sampleModule.sampleRenderOptions,
                     };

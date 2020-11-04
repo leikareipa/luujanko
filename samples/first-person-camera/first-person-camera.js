@@ -35,5 +35,5 @@ export const sampleRenderOptions = {
     farPlane: 1000,
     fov: 65,
     get viewPosition() {return camera.position},
-    get viewDirection() {return camera.direction},
+    get viewRotation() {return camera.direction},
 }
