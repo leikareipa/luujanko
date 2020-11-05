@@ -1,6 +1,6 @@
 // WHAT: Concatenated JavaScript source files
 // PROGRAM: Luujanko
-// VERSION: alpha live (04 November 2020 14:22:53 UTC)
+// VERSION: alpha live (05 November 2020 03:29:54 UTC)
 // AUTHOR: Tarpeeksi Hyvae Soft
 // LINK: https://www.github.com/leikareipa/luujanko/
 // FILES:
@@ -309,7 +309,7 @@ return;
 *
 */
 "use strict";
-Luu.rasterize = function(ngon, svgPolygonElement)
+Luu.rasterize = function(ngon, svgPolygonElement, svgElement)
 {
 Luu.assert && (ngon &&
 (ngon.material) &&
@@ -318,6 +318,7 @@ Luu.assert && (ngon &&
 || Luu.throw("Invalid n-gon for rasterization.");
 svgPolygonElement.setAttribute("stroke", ngon.material.color.string());
 svgPolygonElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
+svgElement.appendChild(svgPolygonElement);
 return;
 }
 /*
@@ -550,6 +551,10 @@ return Luu.matrix44.multiply(Luu.matrix44.multiply(translationMatrix, rotationMa
 *
 */
 "use strict";
+{
+// Holds a bunch of pre-created SVG <polygon> elements that can be appended into an SVG
+// image being rendered.
+const polygonElementCache = [];
 Luu.render = function(meshes = [Luu.mesh()],
 targetSVGElement,
 options = Luu.render.defaultOptions)
@@ -564,17 +569,18 @@ options = Object.freeze({
 });
 const renderWidth = Number(targetSVGElement.getAttribute("width"));
 const renderHeight = Number(targetSVGElement.getAttribute("height"));
-prepare(targetSVGElement, meshes);
+prepare_cache(polygonElementCache, meshes);
 wipe(targetSVGElement);
 draw(meshes, targetSVGElement);
 renderCallInfo.totalRenderTimeMs = (performance.now() - renderCallInfo.totalRenderTimeMs);
 return renderCallInfo;
 function wipe(svgElement)
 {
-for (const child of svgElement.children)
+while (svgElement.lastChild)
 {
-child.setAttribute("points", "");
+svgElement.removeChild(svgElement.lastChild);
 }
+return;
 }
 function draw(meshes, svgElement)
 {
@@ -602,27 +608,30 @@ clipSpaceMatrix,
 screenSpaceMatrix);
 if (transformedNgon)
 {
-const dstPolyElement = svgElement.children[numNgonsRendered++];
-Luu.rasterize(transformedNgon, dstPolyElement);
+Luu.assert && (numNgonsRendered < polygonElementCache.length)
+|| Luu.throw("Overflowing the polygon element cache.");
+const dstPolyElement = polygonElementCache[numNgonsRendered];
+Luu.rasterize(transformedNgon, dstPolyElement, svgElement);
+numNgonsRendered++;
 }
 }
 }
 renderCallInfo.numNgonsRendered = numNgonsRendered;
 return;
 }
-function prepare(svgElement, meshesToBeRendered)
+function prepare_cache(cache, meshesToBeRendered)
 {
 const numNgonsInMeshes = meshesToBeRendered.reduce((ngonCount, mesh)=>(ngonCount += mesh.ngons.length), 0);
-if (svgElement.children.length < numNgonsInMeshes)
+if (cache.length < numNgonsInMeshes)
 {
-const deltaNgons = (numNgonsInMeshes - svgElement.children.length);
-Luu.log(`Resizing the polygon cache's capacity from ${svgElement.children.length} to ${numNgonsInMeshes}`);
+const deltaNgons = (numNgonsInMeshes - cache.length);
+Luu.log(`Resizing the polygon cache's capacity from ${cache.length} to ${numNgonsInMeshes}`);
 for (let i = 0; i < deltaNgons; i++)
 {
-const polyElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-polyElement.setAttribute("fill", "transparent");
-polyElement.setAttribute("pointer-events", "none");
-svgElement.appendChild(polyElement);
+const newElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+newElement.setAttribute("fill", "transparent");
+newElement.setAttribute("pointer-events", "none");
+cache.push(newElement);
 }
 }
 return;
@@ -635,3 +644,4 @@ nearPlane: 1,
 farPlane: 1000,
 fov: 43,
 };
+}

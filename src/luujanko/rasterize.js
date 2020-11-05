@@ -7,7 +7,7 @@
 
 "use strict";
 
-Luu.rasterize = function(ngon, svgPolygonElement)
+Luu.rasterize = function(ngon, svgPolygonElement, svgElement)
 {
     Luu.assert && (ngon &&
                    (ngon.material) &&
@@ -17,6 +17,8 @@ Luu.rasterize = function(ngon, svgPolygonElement)
 
     svgPolygonElement.setAttribute("stroke", ngon.material.color.string());
     svgPolygonElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
+
+    svgElement.appendChild(svgPolygonElement);
 
     return;
 }

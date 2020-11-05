@@ -7,6 +7,12 @@
 
 "use strict";
 
+{
+
+// Holds a bunch of pre-created SVG <polygon> elements that can be appended into an SVG
+// image being rendered.
+const polygonElementCache = [];
+
 Luu.render = function(meshes = [Luu.mesh()],
                       targetSVGElement,
                       options = Luu.render.defaultOptions)
@@ -24,7 +30,7 @@ Luu.render = function(meshes = [Luu.mesh()],
     const renderWidth = Number(targetSVGElement.getAttribute("width"));
     const renderHeight = Number(targetSVGElement.getAttribute("height"));
 
-    prepare(targetSVGElement, meshes);
+    prepare_cache(polygonElementCache, meshes);
     wipe(targetSVGElement);
     draw(meshes, targetSVGElement);
 
@@ -34,10 +40,12 @@ Luu.render = function(meshes = [Luu.mesh()],
 
     function wipe(svgElement)
     {
-        for (const child of svgElement.children)
+        while (svgElement.lastChild)
         {
-            child.setAttribute("points", "");
+            svgElement.removeChild(svgElement.lastChild);
         }
+
+        return;
     }
 
     function draw(meshes, svgElement)
@@ -73,9 +81,14 @@ Luu.render = function(meshes = [Luu.mesh()],
 
                 if (transformedNgon)
                 {
-                    const dstPolyElement = svgElement.children[numNgonsRendered++];
+                    Luu.assert && (numNgonsRendered < polygonElementCache.length)
+                               || Luu.throw("Overflowing the polygon element cache.");
+                               
+                    const dstPolyElement = polygonElementCache[numNgonsRendered];
 
-                    Luu.rasterize(transformedNgon, dstPolyElement);
+                    Luu.rasterize(transformedNgon, dstPolyElement, svgElement);
+
+                    numNgonsRendered++;
                 }
             }
         }
@@ -85,24 +98,24 @@ Luu.render = function(meshes = [Luu.mesh()],
         return;
     }
 
-    function prepare(svgElement, meshesToBeRendered)
+    function prepare_cache(cache, meshesToBeRendered)
     {
         const numNgonsInMeshes = meshesToBeRendered.reduce((ngonCount, mesh)=>(ngonCount += mesh.ngons.length), 0);  
         
-        if (svgElement.children.length < numNgonsInMeshes)
+        if (cache.length < numNgonsInMeshes)
         {
-            const deltaNgons = (numNgonsInMeshes - svgElement.children.length);
+            const deltaNgons = (numNgonsInMeshes - cache.length);
 
-            Luu.log(`Resizing the polygon cache's capacity from ${svgElement.children.length} to ${numNgonsInMeshes}`);
+            Luu.log(`Resizing the polygon cache's capacity from ${cache.length} to ${numNgonsInMeshes}`);
             
             for (let i = 0; i < deltaNgons; i++)
             {
-                const polyElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                
-                polyElement.setAttribute("fill", "transparent");
-                polyElement.setAttribute("pointer-events", "none");
+                const newElement = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
 
-                svgElement.appendChild(polyElement);
+                newElement.setAttribute("fill", "transparent");
+                newElement.setAttribute("pointer-events", "none");
+
+                cache.push(newElement);
             }
         }
 
@@ -117,3 +130,5 @@ Luu.render.defaultOptions = {
     farPlane: 1000,
     fov: 43,
 };
+
+}
