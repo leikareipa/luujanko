@@ -7,8 +7,8 @@
 
 "use strict";
 
-// Values in the range [0,1].
-Luu.color = function(red = 0.5, green = 0.5, blue = 0.5, alpha = 1)
+// RGB values in the range [0,255], alpha value in the range [0,1].
+Luu.color = function(red = 128, green = 128, blue = 128, alpha = 1)
 {
     const publicInterface =
     {
