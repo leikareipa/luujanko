@@ -19,9 +19,7 @@ Luu.color = function(red = 128, green = 128, blue = 128, alpha = 1)
 
         string: function()
         {
-            /// TODO.
-
-            return "gray";
+            return `rgba(${red},${green},${blue},${alpha})`;
         }
     };
     
