@@ -15,7 +15,7 @@ Luu.transform_and_clip = function(ngon,
                                   screenSpaceMatrix = [])
 {
     // Ignore fully transparent polygons.
-    if (!ngon.material.color.alpha)
+    if (!ngon.material.lineColor.alpha)
     {
         return null;
     }

@@ -1,6 +1,6 @@
 // WHAT: Concatenated JavaScript source files
 // PROGRAM: Luujanko
-// VERSION: alpha live (05 November 2020 03:29:54 UTC)
+// VERSION: alpha live (07 November 2020 02:05:13 UTC)
 // AUTHOR: Tarpeeksi Hyvae Soft
 // LINK: https://www.github.com/leikareipa/luujanko/
 // FILES:
@@ -54,8 +54,8 @@ console.log("Luujanko: " + string);
 *
 */
 "use strict";
-// Values in the range [0,1].
-Luu.color = function(red = 0.5, green = 0.5, blue = 0.5, alpha = 1)
+// RGB values in the range [0,255], alpha value in the range [0,1].
+Luu.color = function(red = 128, green = 128, blue = 128, alpha = 1)
 {
 const publicInterface =
 {
@@ -65,8 +65,7 @@ blue,
 alpha,
 string: function()
 {
-/// TODO.
-return "gray";
+return `rgba(${red},${green},${blue},${alpha})`;
 }
 };
 return publicInterface;
@@ -92,7 +91,7 @@ const publicInterface =
 return publicInterface;
 }
 Luu.material.default = {
-color: Luu.color(0.5, 0.5, 0.5, 1),
+lineColor: Luu.color(128, 128, 128, 1),
 allowTransform: true,
 };
 /*
@@ -316,7 +315,7 @@ Luu.assert && (ngon &&
 (ngon.vertices) &&
 (ngon.vertices.length >= 2))
 || Luu.throw("Invalid n-gon for rasterization.");
-svgPolygonElement.setAttribute("stroke", ngon.material.color.string());
+svgPolygonElement.setAttribute("stroke", ngon.material.lineColor.string());
 svgPolygonElement.setAttribute("points", ngon.vertices.reduce((string, v)=>(string += `${v.x},${v.y} `), ""));
 svgElement.appendChild(svgPolygonElement);
 return;
@@ -336,7 +335,7 @@ clipSpaceMatrix,
 screenSpaceMatrix = [])
 {
 // Ignore fully transparent polygons.
-if (!ngon.material.color.alpha)
+if (!ngon.material.lineColor.alpha)
 {
 return null;
 }
