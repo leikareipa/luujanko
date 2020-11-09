@@ -1,6 +1,6 @@
 // WHAT: Concatenated JavaScript source files
 // PROGRAM: Luujanko
-// VERSION: alpha live (07 November 2020 02:05:13 UTC)
+// VERSION: alpha live (09 November 2020 15:30:45 UTC)
 // AUTHOR: Tarpeeksi Hyvae Soft
 // LINK: https://www.github.com/leikareipa/luujanko/
 // FILES:
@@ -638,7 +638,7 @@ return;
 }
 Luu.render.defaultOptions = {
 viewPosition: Luu.vector3(0, 0, 0),
-viewRotation: Luu.vector3(0, 1, 0),
+viewRotation: Luu.vector3(0, 0, 0),
 nearPlane: 1,
 farPlane: 1000,
 fov: 43,
